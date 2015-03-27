@@ -53,7 +53,7 @@ module.exports = function (app) {
         });
     });
 
-//Get an item posted by user
+//Get an item posted by user - (been trying to get route to work but unable to get it working) 
     app.get('/users/:user_id/items/:item_id', function (req, res) {
         Item.find({_creator: req.params.user_id}).populate('items').populate('users').exec(function (err, item) {
             console.log(item);
@@ -242,7 +242,7 @@ module.exports = function (app) {
             if(item._creator != User._id){
                 res.status(404);
                 res.send({
-                    Error: "Please enter the correct username"
+                    Error: "Please provide the correct item ID."
                 })
             }
 
