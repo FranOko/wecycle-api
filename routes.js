@@ -8,7 +8,7 @@ module.exports = function (app) {
     });
 
 
-//get users
+//get all users
     app.get('/users', function(req, res){
         var query = User.where({});
         query.find(function (err, users){
@@ -16,51 +16,52 @@ module.exports = function (app) {
             if(err) {
                 res.status(404);
                 res.send({
-                    message: "There was an error with getting the list of users"
+                    Error: "There was an error getting the list of users, please enter the correct URI."
                 });
                 console.log(err);
             }
         });
     });
 
-    app.get('/users/:user_id', function(req, res){
+//get a user 
+   app.get('/users/:user_id', function(req, res){
         var query = User.where({_id: req.params.user_id});
         query.find(function (err, users){
             res.send(users);
             if(err) {
                 res.status(404);
                 res.send({
-                    message: "There was an error with getting the user by the users id"
+                    Error: "There was an error getting the user, please provide the correct user ID."
                 });
                 console.log(err)
             }
         });
     });
 
-//Get item posted by user
+//Get items posted by user
     app.get('/users/:user_id/items', function (req, res) {
         Item.find({_creator: req.params.user_id}).populate('items').populate('users').exec(function (err, item) {
             console.log(item);
             if(err) {
                 console.log(err);
-                res.status(400);
+                res.status(404);
                 res.send({
-                    message: "There was an error getting the users item"
+                    Error: "There was an error getting the user's items, please provide the correct user ID"
                 })
             }
             res.send(item);
         });
     });
 
-//Get items posted by user
+//Get an item posted by user
     app.get('/users/:user_id/items/:item_id', function (req, res) {
         Item.find({_creator: req.params.user_id}).populate('items').populate('users').exec(function (err, item) {
             console.log(item);
             if(err) {
                 console.log(err);
-                res.status(400);
+                res.status(404);
                 res.send({
-                    message: "There was an error getting the users item"
+                    Error: "There was an error getting the item, please provide the correct item ID or correct user ID"
                 })
             }
             res.send(item);
@@ -84,26 +85,74 @@ module.exports = function (app) {
         user.save(function (err, newUser) {
             if (err) {
                 console.error(err);
-                res.status(404);
+                res.status(400);
                 res.send({
-                    message: "There was an error"
+                    Error: "Unable to add new user, please check the data you entered is correct."
                 })
             } else {
                 res.status(201);
                 res.send({
-                    message: "User successfully created and added"
+                    Message: "User successfully created and added"
                 });
             }
         });
 
     });
 
+//update user 
+    app.put('/users/:user_id', function (req, res){
+        User.findById(req.params.user_id, function (err, user) {
+            
+            //console.log(req.body.name);
+            
+            var data = JSON.parse(req.body);
+            user.name = data.name;
+            user.email = data.email;
+            user.password = data.password;
+            user.phone_number = data.phone_number;
 
-    /**
-     * Items
-     */
+            user.save(function (err) {
+                
+                if (err) {
+                    console.log("error");
+                    res.status(404);
+                    res.send({
+                        Error: "Please provide the correct user ID"
+                    })
+                } else {
+                    res.status(200);
+                    res.send({
+                    Message: "User successfully created and added"
+                });      
+            }
+        });
+    });
+});
 
-//get items
+//delete users 
+  app.del('/users/:user_id', function (req, res) {
+
+        var query = User.where({_id: req.params.user_id});
+        query.remove(function (err) {
+            if(err){
+                res.status(404);
+                res.send({
+                    Error: "Please provide the correct user ID."
+                });
+                console.log(err);
+            } else {
+                res.status(200);
+                res.send({
+                    Message:"User successfully deleted."
+                });
+            }
+        });
+    });
+
+
+/******  Items   ******/
+
+//get all items
     app.get('/items', function(req, res) {
         var query = Item.where({});
         query.find(function (err, items) {
@@ -113,12 +162,13 @@ module.exports = function (app) {
                 console.log(err);
                 res.status(404);
                 res.send({
-                    message: "The was an error getting the list of items"
+                    Error: "There was an error getting the list of items, please enter the correct URI"
                 })
             }
         });
     });
 
+//get an item
     app.get('/items/:item_id', function(req, res){
         var query = Item.where({_id: req.params.item_id});
         query.find(function (err, items){
@@ -128,7 +178,7 @@ module.exports = function (app) {
                 console.log(err);
                 res.status(404);
                 res.send({
-                    message: "There was an error with getting your item by item id"
+                    Error: "There was an error getting the item, please provide the correct item ID."
                 })
             }
         });
@@ -138,16 +188,16 @@ module.exports = function (app) {
     app.post('/items', function(req, res){
 
         if (req.body.name == undefined || req.body.name == "") {
-            res.status(404);
+            res.status(400);
             res.send({
-                message:" No name defined "
+                Error:" No name defined "
             });
         }
 
         if (req.body.url == undefined || req.body.url == "") {
-            res.status(404);
+            res.status(400);
             res.send({
-                message:"Please give url of photos of items"
+                Message:"Please give url of the photos for the item"
             });
         }
 
@@ -165,13 +215,13 @@ module.exports = function (app) {
                     res.status(404);
                     console.error(err);
                     res.send({
-                        message: "Something went wrong with trying to post your item"
+                        Error: "Something went wrong with trying to create the item, please check the data you entered is correct."
                     })
                 } else {
                     console.log(newItem);
                     res.status(201);
                     res.send({
-                        message: "item successfully created and added"
+                        Message: "Item successfully created and added"
                     })
                 }
             });
@@ -192,7 +242,7 @@ module.exports = function (app) {
             if(item._creator != User._id){
                 res.status(404);
                 res.send({
-                    message: "Please enter the correct username"
+                    Error: "Please enter the correct username"
                 })
             }
 
@@ -201,7 +251,7 @@ module.exports = function (app) {
                     console.log("updated successfully");
                     res.status(200);
                     res.send({
-                        message: "updated successfully"
+                        Message: "Item updated successfully"
                     })
                 } else {
                     console.log(err);
@@ -219,16 +269,15 @@ module.exports = function (app) {
             if(err){
                 res.status(404);
                 res.send({
-                    message:"item not deleted"
+                    Error:"Please provide the correct item ID."
                 });
                 console.log(err);
             } else {
                 res.status(200);
                 res.send({
-                    message:"item deleted"
+                    Message:"Item successfully deleted."
                 });
             }
         });
     });
-};
-
+}
