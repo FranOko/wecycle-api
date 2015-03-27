@@ -52,7 +52,21 @@ module.exports = function (app) {
         });
     });
 
-
+//Get items posted by user
+    app.get('/users/:user_id/items/:item_id', function (req, res) {
+        Item.find({_creator: req.params.user_id}).populate('items').populate('users').exec(function (err, item) {
+            console.log(item);
+            if(err) {
+                console.log(err);
+                res.status(400);
+                res.send({
+                    message: "There was an error getting the users item"
+                })
+            }
+            res.send(item);
+        });
+    });
+    
 //post users
     app.post('/users', function(req, res){
         //console.log("Params: " + req.params.email + "");
