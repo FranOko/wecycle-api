@@ -29,11 +29,17 @@ frisby.create('Post users')
     .expectHeaderContains('Content-Type', 'json')
 .toss();
 
-//testing post user and items
+//testing get user and items
 frisby.create('gets the users and items')
-  .get('http://localhost:5000/Users/items/5501d5e4645f9cb101f22265')
+  .get('http://localhost:5000/users/5501d0c6645f9cb101f22264/items')
   .expectHeaderContains('Content-Type', 'json')
 .toss();
+
+//testing users, user id and items
+frisby.create('gets the users, user_id and items')
+  .get('http://localhost:5000/users/5501d0c6645f9cb101f22264/items')
+  .expectHeaderContains('Content-Type', 'json')
+.toss()
 
 //testing getting users
 frisby.create('gets the users')
